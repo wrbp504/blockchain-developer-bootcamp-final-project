@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySimple Dapp</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+
+    <h1 Style="color:blue">Contract Keeper</h1>
+</head>
+
+<body>
+    <div class="contents">
+
+        <!--   Left Side of the screen -->
+        <div class="col-md-6 half" style="background-color:lavender;">
+            <div id="mm-detected"></div>
+            <button class="roundbutton" id="mm-connect">Connect to MetaMask</button>
+            <span id="mm-current-account" #CA></span>
+            <iframe id="pdfvisor" style="width: 100%;height: 100%;border: none;"></iframe>
+        </div>
+
+        <!--      Right side of the screen -->
+        <div class="col-md-6 half" style="background-color:rgb(118, 135, 209);">
+            <br>
+<!--
+            <label class="myLabel" style="border: 10px solid white ;top: 5%;left:10%;position: absolute">
+                
+                <span><br>Choose File</span>
+            </label>
+        -->
+            <input  type="file" id="ck-file" required style="display:none" />
+            <button class="roundbutton" id="ck-file2" style="top: 5%; left:10%; position: absolute">
+                Select File
+            </button>
+                
+
+            <br><br><br><br><br><br>
+
+            <span id="ck-fname" style="color:white"> No file selected</span>
+            <br><span style="color:white">SHA256 for selected file</span>
+            <textarea id="ck-content" style="width: 95%">hash SHA256</textarea>
+            <br>
+            
+            <button class="roundbutton" id="ck-sign" style="top: 5%; left:45%; position: absolute; display: none">
+                Sign Contract
+            </button>
+            
+            <button class="roundbutton" id="ck-add" style="top: 5%; left:70%; position: absolute; display: none">
+                Add Contract
+            </button>
+            
+            <div id="details"></div>
+
+            <button class="roundbutton" id="ck-submit" style="top:83%; position:absolute; left:40%; display: none">
+                Submit Contract
+            </button>
+
+        </div>
+        
+    </div>
+
+    <script src="dapp.js"></script>
+
+</body>
+
+</html>
