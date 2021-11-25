@@ -4,14 +4,14 @@ pragma solidity 0.8.9 ;
 import "@openzeppelin/contracts/access/Ownable.sol";
 contract ContractKeeper is Ownable{
 
-  enum Status { notCreated, created, signed }
+  enum State { NotCreated, Created, Signed }
   uint256 balance;
 
   struct LegalContract {
     address[] signers;
     string[] signersNames;
     uint256 numSigners;
-    Status status;
+    State state;
   }
   
  struct SigControl {
@@ -20,7 +20,7 @@ contract ContractKeeper is Ownable{
  }
  
   mapping (uint => LegalContract) legalContracts; //lchash => LegalContract
-  mapping (uint => mapping (address => SigControl)) sigControl; //signer => Contract => signature status
+  mapping (uint => mapping (address => SigControl)) sigControl; //signer => Contract => signature state
   //mapping (address => Signer) signersRegister;
   uint[] contractsIdx;
 
@@ -33,12 +33,12 @@ contract ContractKeeper is Ownable{
   }
 
   modifier isCreated(uint256 lchash){
-    require(legalContracts[lchash].status == Status.created,"Contract not exist");
+    require(legalContracts[lchash].state == State.Created,"Contract not exist");
     _;
   }
 
   modifier exist(uint256 lchash){
-    require(legalContracts[lchash].status != Status.notCreated,"Contract not exist");
+    require(legalContracts[lchash].state != State.NotCreated,"Contract not exist");
     _;
   }
 
@@ -49,7 +49,7 @@ contract ContractKeeper is Ownable{
   }
 
   modifier isNotCreated(uint256 lchash){
-    require(legalContracts[lchash].status == Status.notCreated, "Contract already exist");
+    require(legalContracts[lchash].state == State.NotCreated, "Contract already exist");
     _;
   }
   modifier notSigned(uint256 lchash){
@@ -58,8 +58,8 @@ contract ContractKeeper is Ownable{
   }
   
 
-  event legalContractAdded(uint256 lchash);
-  event legalContractSigned(uint256 lchash, address signer);
+  event LegalContractAdded(uint256 lchash);
+  event LegalContractSigned(uint256 lchash, address signer);
 
   function getContractSigners(uint256 lchash)
     public
@@ -89,10 +89,10 @@ contract ContractKeeper is Ownable{
         signers: signers,
         signersNames: names,
         numSigners: 0,
-        status: Status.created
+        state: State.Created
     });
     contractsIdx.push(lchash);
-    emit legalContractAdded(lchash);
+    emit LegalContractAdded(lchash);
     return true;
   }
   
@@ -120,9 +120,9 @@ contract ContractKeeper is Ownable{
       sigControl[lchash][msg.sender].hasSigned = true;
       legalContracts[lchash].numSigners ++;
       if (legalContracts[lchash].numSigners == legalContracts[lchash].signers.length){
-          legalContracts[lchash].status = Status.signed;
+          legalContracts[lchash].state = State.Signed;
       }
-      emit legalContractSigned(lchash, msg.sender);
+      emit LegalContractSigned(lchash, msg.sender);
       return true;
   }
   
