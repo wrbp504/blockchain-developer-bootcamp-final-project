@@ -3,7 +3,7 @@ var ckjson;
 var hash;
 
 async function loadJSON() {
-  const response = await fetch('../../build/contracts/ContractKeeper.json');
+  const response = await fetch('./contracts/ContractKeeper.json');
   ckjson = await response.json();
 }
 
