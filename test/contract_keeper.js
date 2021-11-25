@@ -58,12 +58,6 @@ contract("ContractKeeper", function (accounts) {
       await instance.addLegalContract(2,[first, second],["first","second"], { from: first, value: 1 });
 
       const result = await instance.getLegalContract.call(2);
-      console.log("\n********************************\n");
-      console.log("result[0] " + result[0]);
-      console.log("result[0][0] " + result[0][0]);
-      console.log("result[0][0][0] " + result[0][0][0]);
-      console.log("result[0][0][1] " + result[0][0][1]);
-      console.log("result[1]" + result[1]);
       
       assert.equal(
         result[0][0][0],

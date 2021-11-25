@@ -1,17 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9 ;
+
+/// @title Contract/document integrity verificator
+/// @author Wilhelm Bendeck
+/// @notice Contract keeps on public chain hash of document signed by interested parties to verify in the future with hash
+/// @dev no issues at this point
+
+
 //import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 contract ContractKeeper is Ownable{
 
   enum State { NotCreated, Created, Signed }
+
   uint256 balance;
 
   struct LegalContract {
-    address[] signers;
-    string[] signersNames;
-    uint256 numSigners;
-    State state;
+    address[] signers; //array witn the addresses of the signers
+    string[] signersNames; //array with names, description or nicnames of the signers
+    uint256 numSigners; //number of asigners that alredy signed
+    State state; //state of the contract
+    uint256 index; //index in the contracts list
   }
   
  struct SigControl {
@@ -22,7 +31,7 @@ contract ContractKeeper is Ownable{
   mapping (uint => LegalContract) legalContracts; //lchash => LegalContract
   mapping (uint => mapping (address => SigControl)) sigControl; //signer => Contract => signature state
   //mapping (address => Signer) signersRegister;
-  uint[] contractsIdx;
+  uint[] public contractsList;
 
   constructor()  {
   }
@@ -60,16 +69,13 @@ contract ContractKeeper is Ownable{
 
   event LegalContractAdded(uint256 lchash);
   event LegalContractSigned(uint256 lchash, address signer);
-
-  function getContractSigners(uint256 lchash)
-    public
-    view 
-    isCreated(lchash)
-    returns(address[] memory,string[] memory )
-  {
-      return (legalContracts[lchash].signers,legalContracts[lchash].signersNames);
-  }
+  event LegalContractRmoved(uint256 lchash);
   
+/// @notice adds a new contract hash for future signing and verification
+/// @param lchash hash of the document to be keep and used for verification
+/// @param signers array with signers addresses
+/// @param names array with a description of each signer
+/// @return true if succesful in adding contract
   function addLegalContract ( uint256 lchash ,address[] calldata signers,string[] calldata names )
     public
     payable
@@ -89,12 +95,18 @@ contract ContractKeeper is Ownable{
         signers: signers,
         signersNames: names,
         numSigners: 0,
-        state: State.Created
+        state: State.Created,
+        index: contractsList.length
     });
-    contractsIdx.push(lchash);
+
+    contractsList.push(lchash);
     emit LegalContractAdded(lchash);
     return true;
   }
+  
+  /// @notice return legal contract data
+  /// @param lchash hash of legal contract to be retrived
+  /// @return (legal contract struct,  boolean[] with signing status of each signer)
   
   function getLegalContract(uint256 lchash)
     public
@@ -108,6 +120,10 @@ contract ContractKeeper is Ownable{
       }
     return (legalContracts[lchash], signs);
   }
+  
+  /// @notice called by signer to sign a contract
+  /// @param lchash hash of the contract to be sogned
+  /// @return true if contract is signed succesfully
   
   function signContract(uint256 lchash) 
     public
@@ -125,11 +141,25 @@ contract ContractKeeper is Ownable{
       emit LegalContractSigned(lchash, msg.sender);
       return true;
   }
-  
-  function removeContract  (uint256 lchash) onlyOwner public {
+
+/// @notice call by the owner to remove a contract
+/// @dev before using consider the gas cost of removing the data
+/// @param lchash hash of the contract to be removed
+/// @return true if contract is succesfully removed
+  function removeContract (uint256 lchash) exist(lchash) onlyOwner public returns(bool) {
     //TODO
+    LegalContract storage toRemove = legalContracts[lchash];
+    LegalContract storage last = legalContracts[contractsList[contractsList.length-1]];
+    contractsList[toRemove.index]=contractsList[last.index];
+    contractsList.pop();
+    for (uint256 i = 0; i<toRemove.signers.length; i++){
+        delete(sigControl[lchash][toRemove.signers[i]]);
+    }
+    delete(legalContracts[lchash]);
+    return true;
   }
 
+/// @notice function to destroy deployed contract
   function destroyContract() onlyOwner public {
     selfdestruct(payable(msg.sender));
   }
