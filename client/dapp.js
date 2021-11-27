@@ -3,10 +3,9 @@ let ckjson;
 let hash;
 
 async function loadJSON() {
-  const response = await fetch('./contracts/ContractKeeper.json');
+  const response = await fetch('./contracts/ContractKeeperReduced.json');
   ckjson = await response.json();
 }
-
 loadJSON();
 
 async function selectedAddress() {
@@ -35,21 +34,6 @@ window.addEventListener('load', function () {
     alert("Please install Metamask and reload page");
   }
 })
-
-const mmEnable = document.getElementById('mm-connect')
-let accounts;
-mmEnable.onclick = async () => {
-  if (window.ethereum){
-    accounts = await ethereum.request({
-      method:
-        'eth_requestAccounts'
-    });
-  
-
-    return;
-  }
-  alert("Please install Metamask and reload page");
-}
 
 const ckInputFile = document.getElementById('ck-file');
 ckInputFile.onchange = async (event) => {
@@ -149,11 +133,11 @@ async function verifyContract() {
   let web3 = new Web3(window.ethereum)
   const networkId = await web3.eth.net.getId();
   
-  console.log("abi "+ckjson.abi);
+  console.log("typeof abi "+(typeof ckjson.abi));
   console.log("NetworkId "+networkId);
 
   if(typeof ckjson.networks[networkId] === 'undefined'){
-    alert("contract not deployed on NetwordId "+ networkId);
+    alert("contract not deployed on NetwordId "+ networkId+" only in: "+Object.keys(ckjson.networks));
     return;
   } 
   console.log("ckjson.networks[networkId].address "+ckjson.networks[networkId].address);
@@ -276,7 +260,7 @@ ckSubmit.onclick = async () => {
   }
   let web3 = new Web3(window.ethereum)
   const networkId = await web3.eth.net.getId();
-  console.log("abi "+ckjson.abi);
+  console.log("typeof abi "+(typeof ckjson.abi));
   console.log("NetworkId "+networkId);
   console.log("ckjson.networks[networkId].address "+ckjson.networks[networkId].address);
 

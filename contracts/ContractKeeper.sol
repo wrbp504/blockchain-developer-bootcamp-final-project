@@ -6,19 +6,17 @@ pragma solidity 0.8.9 ;
 /// @notice Contract keeps on public chain hash of document signed by interested parties to verify in the future with hash
 /// @dev no issues at this point
 
-
+//used for test on remix
 //import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 contract ContractKeeper is Ownable{
 
   enum State { NotCreated, Created, Signed }
 
-  uint256 balance;
-
   struct LegalContract {
     address[] signers; //array witn the addresses of the signers
     string[] signersNames; //array with names, description or nicnames of the signers
-    uint256 numSigners; //number of asigners that alredy signed
+    uint256 noOfSignatures; //number of signers that alredy signed
     State state; //state of the contract
     uint256 index; //index in the contracts list
   }
@@ -28,32 +26,34 @@ contract ContractKeeper is Ownable{
      bool hasSigned;
  }
  
-  mapping (uint => LegalContract) legalContracts; //lchash => LegalContract
+  mapping (uint => LegalContract) legalContracts; //lchash => LegalContract.
   mapping (uint => mapping (address => SigControl)) sigControl; //signer => Contract => signature state
   //mapping (address => Signer) signersRegister;
   uint[] public contractsList;
 
-  constructor()  {
-  }
 
   modifier isSigner(uint256 lchash){
     require(sigControl[lchash][msg.sender].isSigner, "Sender is not signer of this contract");
     _;
   }
 
-  modifier isCreated(uint256 lchash){
-    require(legalContracts[lchash].state == State.Created,"Contract not exist");
+  modifier isSignable(uint256 lchash){
+    require(legalContracts[lchash].state == State.Created,"Contract does not exist or is already signed");
     _;
   }
 
   modifier exist(uint256 lchash){
-    require(legalContracts[lchash].state != State.NotCreated,"Contract not exist");
+    require(legalContracts[lchash].state != State.NotCreated,"Contract does not exist");
     _;
   }
 
   modifier verifySigners( address[] calldata signers,string[] calldata names){
     require(signers.length == names.length, "Number of signers and names are nor equal");
-    require(signers.length >1 && signers.length <= 3,"Ivalid numer of signers");
+    require(signers.length >1 && signers.length <= 3,"Invalid numer of signers");
+    //this is limited loop of 3 accounts max
+    for (uint256 i=0; i<signers.length;i++){
+      require(signers[i]!=address(0), "Signer address not valid");
+    }
     _;  
   }
 
@@ -66,7 +66,6 @@ contract ContractKeeper is Ownable{
     _;
   }
   
-
   event LegalContractAdded(uint256 lchash);
   event LegalContractSigned(uint256 lchash, address signer);
   event LegalContractRmoved(uint256 lchash);
@@ -94,7 +93,7 @@ contract ContractKeeper is Ownable{
     legalContracts[lchash] = LegalContract({
         signers: signers,
         signersNames: names,
-        numSigners: 0,
+        noOfSignatures: 0,
         state: State.Created,
         index: contractsList.length
     });
@@ -128,14 +127,14 @@ contract ContractKeeper is Ownable{
   function signContract(uint256 lchash) 
     public
     isSigner(lchash)
-    isCreated(lchash)
+    isSignable(lchash)
     notSigned(lchash)
     returns(bool)
   {
        
       sigControl[lchash][msg.sender].hasSigned = true;
-      legalContracts[lchash].numSigners ++;
-      if (legalContracts[lchash].numSigners == legalContracts[lchash].signers.length){
+      legalContracts[lchash].noOfSignatures ++;
+      if (legalContracts[lchash].noOfSignatures == legalContracts[lchash].signers.length){
           legalContracts[lchash].state = State.Signed;
       }
       emit LegalContractSigned(lchash, msg.sender);
@@ -159,8 +158,25 @@ contract ContractKeeper is Ownable{
     return true;
   }
 
+/// @notice return collected fees to owner
+/// @return balance trabnsferred to owner
+function  collectFees()
+  onlyOwner
+  public
+  returns (uint256) {
+    uint256 balance = address(this).balance;
+    if (balance>0){
+      (bool sent, bytes memory data) = owner().call{value: balance}("");
+      require(sent,"Failed to send Ether to owner");
+    }
+  return balance;
+}
+
+
 /// @notice function to destroy deployed contract
-  function destroyContract() onlyOwner public {
+  function destroyContract()
+    onlyOwner 
+    public {
     selfdestruct(payable(msg.sender));
   }
 }
