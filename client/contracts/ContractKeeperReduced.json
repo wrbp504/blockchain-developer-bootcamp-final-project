@@ -1,11 +1,6 @@
 {
   "abi": [
     {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
       "anonymous": false,
       "inputs": [
         {
@@ -177,7 +172,7 @@
             },
             {
               "internalType": "uint256",
-              "name": "numSigners",
+              "name": "noOfSignatures",
               "type": "uint256"
             },
             {
@@ -238,6 +233,19 @@
           "internalType": "bool",
           "name": "",
           "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "collectFees",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "nonpayable",
@@ -328,6 +336,12 @@
       "links": {},
       "address": "0xf97615A80ABC635c326B6D9728c0f3c677383448",
       "transactionHash": "0xcfb3f567969d8eb7ba4e587d2d4fc87bc7b4bc50cd853689ccb2e2bb965f1f54"
+    },
+    "1638046327334": {
+      "events": {},
+      "links": {},
+      "address": "0x61F40D15B0508d6d52E1B88DDC8F578bbb0A3f32",
+      "transactionHash": "0xb5994705407bd4d13e68a125d5b051414e46c5736a52d6af1df5611c4fb9c270"
     }
   }
 }
