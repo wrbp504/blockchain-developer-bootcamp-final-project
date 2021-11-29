@@ -60,9 +60,27 @@ window.addEventListener('load', async function () {
   }
 })
 
+const dropContainer = document.getElementById('right-side');
+console.log(typeof dropContainer);
+dropContainer.ondragover = dropContainer.ondragenter = function(evt) {
+  evt.preventDefault();
+};
+
+dropContainer.ondrop = function(evt) {
+  // pretty simple -- but not for IE :(
+  evt.preventDefault();
+  ckInputFile.files = evt.dataTransfer.files;
+  handleFile(ckInputFile.files[0]);
+};
+
 const ckInputFile = document.getElementById('ck-file');
 ckInputFile.onchange = async (event) => {
-  const file = event.target.files.item(0);
+  handleFile(event.target.files.item(0));
+} 
+const ckFile2 = document.getElementById("ck-file2");
+
+async function handleFile (file) {
+
   let fl = file.name.length;
   if (fl < 4 || String(file.name).substring(fl - 4, fl).toLowerCase().localeCompare(".pdf")) {
     alert("invalid file type, must be pdf");
@@ -85,7 +103,8 @@ ckInputFile.onchange = async (event) => {
   reader.readAsBinaryString(file);
 }
 
-const ckFile2 = document.getElementById("ck-file2");
+
+
 ckFile2.onclick = async () => {
   if (typeof window.ethereum === 'undefined') {
     alert("Please install Metamask and reload page");
