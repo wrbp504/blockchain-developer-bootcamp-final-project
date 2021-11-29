@@ -8,10 +8,11 @@ module.exports =  function (deployer) {
 
   let reducedJson = {};
   reducedJson["abi"] = ckjson.abi;
-  let keys = Oject.keys(cjson.networks);
+  let keys = Object.keys(ckjson.networks);
   reducedJson["networks"] = {};
   for (var i=0;i<keys.length;i++){
-    reducedJson["networks"][keys[i]].address=ckjson.networks[keys[i]].address;
+    reducedJson["networks"][keys[i]]={};
+    reducedJson["networks"][keys[i]]["address"]=ckjson.networks[keys[i]].address;
   }
 
   fs.writeFile('./client/contracts/ContractKeeperReduced.json', JSON.stringify(reducedJson,null,2), (error) => {

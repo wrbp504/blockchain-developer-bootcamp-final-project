@@ -10,37 +10,61 @@ async function loadJSON() {
 loadJSON();
 
 async function selectedAddress() {
-  if (window.ethereum) {
-    
-  const accounts = await ethereum.request({
-    method:
-      'eth_requestAccounts'
-  });
-  if (typeof accounts !== 'undefined') {
-    return accounts[0].toLowerCase();
+  if (typeof window.ethereum !== 'undefined') {
+
+    var accounts = await ethereum.request({
+      method:
+        'eth_accounts'
+    });
+
+    if (accounts.length == 0) {
+      accounts = await ethereum.request({
+        method:
+          'eth_requestAccounts'
+      });
+    }
+
+    if (accounts.length !== 0) {
+      await setHandlers();
+      return accounts[0].toLowerCase();
+    }
   }
-}
+  alert("Need to accept connection for this contract function");
   return "";
 }
 
+async function setHandlers() {
+  ethereum.on('accountsChanged',  (accounts) =>{
+    document.getElementById('mm-account').innerHTML = 
+     "<strong>SELECTED " +accounts[0]+"</strong>";
+    verifyContract();
+  } );
+  ethereum.on('chainChanged', (_chainId) => window.location.reload());
+}
 
-window.addEventListener('load', function () {
-  if (typeof window.ethereum !== 'undefined') {
-
-    ethereum.on('accountsChanged', function (accounts) {
-      verifyContract();
-    })
-  }
-  else {
+window.addEventListener('load', async function () {
+  if (typeof window.ethereum === 'undefined') {
     alert("Please install Metamask and reload page");
+  } else {
+    var accounts = await ethereum.request({
+      method:
+        'eth_accounts'
+    });
+    if (accounts.length>0){
+      document.getElementById('mm-account').innerHTML = "<strong>SELECTED " +accounts[0]+"</strong>";
+
+    } else{
+      document.getElementById('mm-account').innerHTML = "Metamask not connected";
+    }
+    setHandlers();
   }
 })
 
 const ckInputFile = document.getElementById('ck-file');
 ckInputFile.onchange = async (event) => {
   const file = event.target.files.item(0);
-  let fl=file.name.length;
-  if (fl<4 || String(file.name).substring(fl-4,fl).toLowerCase().localeCompare(".pdf") ) {
+  let fl = file.name.length;
+  if (fl < 4 || String(file.name).substring(fl - 4, fl).toLowerCase().localeCompare(".pdf")) {
     alert("invalid file type, must be pdf");
     return;
   }
@@ -61,42 +85,83 @@ ckInputFile.onchange = async (event) => {
   reader.readAsBinaryString(file);
 }
 
-const ckFile2 =document.getElementById("ck-file2");
-ckFile2.onclick = async () =>{
-  if (!window.ethereum){
+const ckFile2 = document.getElementById("ck-file2");
+ckFile2.onclick = async () => {
+  if (typeof window.ethereum === 'undefined') {
     alert("Please install Metamask and reload page");
     return;
   }
   document.getElementById("ck-file").click();
 }
 
-function getReason(err){
+function getReason(err) {
+  const reason = { reason: "", message: "", other: "" };
+  reason.message = "";
+
+  getReason2(err, reason);
+  if (reason.reason !== "") return reason.reason;
+  if (reason.message !== "") return reason.message;
+  return reason.other;
+
+}
+
+function getReason2(err, reason) {
+  console.log("Entrado en get reason " + typeof err);
+  console.log("err " + err);
+  console.log("reason" + String(reason));
+
+
   let pos = String(err).search("{");
-  if (pos > 1){
-    let pos2 =String(err).lastIndexOf("}")+1;
-    let errjson = JSON.parse(String(err).substring(pos,pos2));
-    return getReason(errjson)
+  console.log("Primer pos " + pos);
+
+  if (pos > 1) {
+    let pos2 = String(err).lastIndexOf("}") + 1;
+    let errjson = JSON.parse(String(err).substring(pos, pos2));
+    getReason2(errjson, reason);
+    return;
   }
-  else if (typeof err === 'object'){
+  else if (typeof err === 'object') {
     let keys = Object.keys(err);
-    for (var i=0; i <keys.length;i++){
-      if (!keys[i].localeCompare("reason")){
+    console.log("keys " + keys);
+
+    if (keys.length == 0) {
+      reason.other = String(err);
+      return;
+    }
+
+    for (var i = 0; i < keys.length; i++) {
+      console.log(keys[i] + "-->" + err[keys[i]]);
+      if (!keys[i].localeCompare("reason")) {
         console.log("reason==> " + err["reason"]);
-        return err["reason"];
+        reason.reason = err["reason"]
+        return;
       }
-      let resp = getReason(err[keys[i]]);
-      if (resp.localeCompare("")){
-        return resp;
+      if (!keys[i].localeCompare("message")) {
+        console.log("message==> " + err["message"]);
+        let msg = err["message"];
+        let pos3 = msg.search(":");
+        if (pos3 > 0) {
+          reason.message = msg.substring(pos3 + 2)
+        }
+      }
+      if (typeof err[keys[i]] === 'object') {
+        getReason2(err[keys[i]], reason);
+        if (reason.reason !== "") return;
+      } else {
+        if (err[keys[i]] != null) {
+          reason.other = String(err[keys[i]]);
+        }
       }
     }
   }
-  return "";  
+  return;
 }
+
 
 
 const ckAdd = document.getElementById("ck-add");
 ckAdd.onclick = async () => {
-  if(!window.ethereum){
+  if (typeof window.ethereum === 'undefined') {
     alert("Please install Metamask and reload page");
     return;
   }
@@ -104,7 +169,7 @@ ckAdd.onclick = async () => {
     alert("Please connect to Metamask");
     return;
   }
-  ckAdd.style.display="none";
+  ckAdd.style.display = "none";
   document.getElementById('ck-submit').style.display = "";
 
   const details = document.getElementById("details");
@@ -121,14 +186,18 @@ ckAdd.onclick = async () => {
   `
   const account1 = document.getElementById("account1");
   account1.innerHTML = await selectedAddress();
-  document.getElementById("message-area").innerHTML="Beware that form will be reset if new account is selected in Metamask!!!!"
+  document.getElementById("message-area").innerHTML = "Beware that form will be reset if new account is selected in Metamask!!!!"
 };
 
 
 async function verifyContract() {
   let SCResponse;
   let accounts;
- 
+
+  if(!document.getElementById("ck-content").innerText.localeCompare( "")){
+      return;
+  }
+
   const details = document.getElementById("details");
   details.innerHTML = `
   <label>Signer 1:</label>
@@ -150,8 +219,8 @@ async function verifyContract() {
   const name2 = document.getElementById("name2");
   const account3 = document.getElementById("account3");
   const name3 = document.getElementById("name3");
- 
-  if (!window.ethereum){
+
+  if (typeof window.ethereum === 'undefined') {
     alert("Please install Metamask and reload page");
     return;
   }
@@ -159,17 +228,21 @@ async function verifyContract() {
   web3.eth.handleRevert = false;
   const networkId = await web3.eth.net.getId();
 
-  console.log("NetworkId "+networkId);
+  console.log("NetworkId " + networkId);
 
-  if(typeof ckjson.networks[networkId] === 'undefined'){
-    alert("contract not deployed on NetwordId "+ networkId);
+  if (typeof ckjson.networks[networkId] === 'undefined') {
+    alert("contract not deployed on NetwordId " + networkId);
     return;
-  } 
+  }
 
-  console.log("ckjson.networks[networkId].address "+ckjson.networks[networkId].address);
+  console.log("ckjson.networks[networkId].address " + ckjson.networks[networkId].address);
 
-  const contractKeeper = new web3.eth.Contract
+  const contractKeeper = await new web3.eth.Contract
     (ckjson.abi, ckjson.networks[networkId].address);
+
+
+
+
 
   try {
     SCResponse = await contractKeeper.methods.getLegalContract("0x" + hash.toString(CryptoJS.enc.Hex)).call();
@@ -178,23 +251,23 @@ async function verifyContract() {
     document.getElementById('ck-add').style.display = "";
     document.getElementById('ck-submit').style.display = "none";
     document.getElementById('ck-sign').style.display = "none";
-    document.getElementById("message-area").innerHTML=getReason(err);
+    document.getElementById("message-area").innerHTML = getReason(err);
 
     return false;
   }
 
   const legalContract = SCResponse[0];
 
-  account1.innerHTML =  legalContract.signers[0] + "<strong>"+ (SCResponse[1][0] ? " SIGNED" : " NOT SIGNED")+"</strong>";
-  name1.innerHTML =   legalContract.signersNames[0];
+  account1.innerHTML = legalContract.signers[0] + "<strong>" + (SCResponse[1][0] ? " SIGNED" : " NOT SIGNED") + "</strong>";
+  name1.innerHTML = legalContract.signersNames[0];
 
-  account2.innerHTML =  legalContract.signers[1] + "<strong>"+ (SCResponse[1][1] ? " SIGNED" : " NOT SIGNED")+"</strong>";
-  name2.innerHTML =  legalContract.signersNames[1];
+  account2.innerHTML = legalContract.signers[1] + "<strong>" + (SCResponse[1][1] ? " SIGNED" : " NOT SIGNED") + "</strong>";
+  name2.innerHTML = legalContract.signersNames[1];
 
   if (legalContract.signers.length == 3) {
 
-    account3.innerHTML =   legalContract.signers[2] + "<strong>"+ (SCResponse[1][2] ? " SIGNED" : " NOT SIGNED")+"</strong>";
-    name3.innerHTML =   legalContract.signersNames[2];
+    account3.innerHTML = legalContract.signers[2] + "<strong>" + (SCResponse[1][2] ? " SIGNED" : " NOT SIGNED") + "</strong>";
+    name3.innerHTML = legalContract.signersNames[2];
 
   } else {
     account3.innerHTML = "---"
@@ -209,17 +282,17 @@ async function verifyContract() {
     if (legalContract.signers[i].toLowerCase().localeCompare(selAdd) == 0 && !SCResponse[1][i]) {
       document.getElementById('ck-sign').style.display = "";
       break;
-    }   
+    }
   }
   switch (parseInt(legalContract.state)) {
     case 1:
-      document.getElementById("message-area").innerHTML="Accounts labeled Not Signed, must be selected first in Metamask to sign";
+      document.getElementById("message-area").innerHTML = "Accounts labeled NOT SIGNED, must be selected first in Metamask to sign";
       break;
     case 2:
-      document.getElementById("message-area").innerHTML="Already signed contracts are view only";
+      document.getElementById("message-area").innerHTML = "Already signed contracts are view only";
       break;
     case 0:
-      document.getElementById("message-area").innerHTML="Click Add Contract to add contract"
+      document.getElementById("message-area").innerHTML = "Click Add Contract to add contract"
       break;
   }
   return true;
@@ -274,39 +347,42 @@ ckSubmit.onclick = async () => {
   }
 
   if (!account1.innerHTML.toLowerCase().localeCompare(account2.value.toLowerCase()) ||
-      !account1.innerHTML.toLowerCase().localeCompare(account3.value.toLowerCase()) ||
-      !account2.value.toLowerCase().localeCompare(account3.value.toLowerCase())) 
-  {
+    !account1.innerHTML.toLowerCase().localeCompare(account3.value.toLowerCase()) ||
+    !account2.value.toLowerCase().localeCompare(account3.value.toLowerCase())) {
     alert("account should have different values")
     return;
   }
 
-  if(!window.ethereum){
+  if (typeof window.ethereum === 'undefined') {
     alert("Please install Metamask and reload page");
     return;
   }
- 
+
   let web3 = new Web3(window.ethereum)
   const networkId = await web3.eth.net.getId();
 
   const contractKeeper = new web3.eth.Contract
     (ckjson.abi, ckjson.networks[networkId].address);
-  
+
+  document.getElementById("message-area").innerHTML = "PROCESSING PLEASE WAIT";
+  console.log("PROCCESSING");
+
   try {
     const response = await contractKeeper.methods
-    .addLegalContract("0x" + hash.toString(CryptoJS.enc.Hex),
-      accs,
-      names).send({ from: await selectedAddress(), value: 1 });
-    
+      .addLegalContract("0x" + hash.toString(CryptoJS.enc.Hex),
+        accs,
+        names).send({ from: await selectedAddress(), value: 1 });
+
   } catch (error) {
-    alert("Trasaction failed, reason: "+getReason(error));    
+    console.log("transaction failed\n");
+    alert("Trasaction failed, reason: " + getReason(error));
   }
   verifyContract();
 }
 
 const ckSign = document.getElementById("ck-sign");
 ckSign.onclick = async () => {
-  if(!window.ethereum){
+  if (typeof window.ethereum === 'undefined') {
     alert("Please install Metamask and reload page");
     return;
   }
@@ -317,13 +393,20 @@ ckSign.onclick = async () => {
   const contractKeeper = new web3.eth.Contract
     (ckjson.abi, ckjson.networks[networkId].address);
 
-  if (typeof ckjson.networks[networkId] === 'undefined'){
-    alert("ContratKepper not deployed on Netword Id "+networkId);
+
+
+  if (typeof ckjson.networks[networkId] === 'undefined') {
+    alert("ContratKepper not deployed on Netword Id " + networkId);
     return;
   }
- 
-  const response = await contractKeeper.methods
-    .signContract("0x" + hash.toString(CryptoJS.enc.Hex)).send({ from: await selectedAddress() });
-
+  document.getElementById("message-area").innerHTML = "PROCESSING PLEASE WAIT";
+  console.log("PROCCESSING");
+  try {
+    const response = await contractKeeper.methods
+      .signContract("0x" + hash.toString(CryptoJS.enc.Hex)).send({ from: await selectedAddress() });
+  } catch (error) {
+    console.log("transaction failed\n");
+    alert("Trasaction failed, reason: " + getReason(error));
+  }
   verifyContract();
 }

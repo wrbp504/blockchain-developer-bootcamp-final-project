@@ -54,6 +54,7 @@ contract ContractKeeper is Ownable{
     for (uint256 i=0; i<signers.length;i++){
       require(signers[i]!=address(0), "Signer address not valid");
     }
+    require(signers[0] == msg.sender,"msg.sender must be the first signer");
     _;  
   }
 
@@ -83,17 +84,22 @@ contract ContractKeeper is Ownable{
     returns(bool)
   {
     require(msg.value >= 1 wei,"Not Enough funds");
-    for (uint i = 0; i < signers.length; i++){
+    sigControl[lchash][signers[0]]= SigControl({
+          isSigner: true,
+          hasSigned: true
+        }); 
+    for (uint i = 1; i < signers.length; i++){
         sigControl[lchash][signers[i]] = SigControl({
             isSigner: true,
             hasSigned: false
         });
-        
     }
+
+    
     legalContracts[lchash] = LegalContract({
         signers: signers,
         signersNames: names,
-        noOfSignatures: 0,
+        noOfSignatures: 1,
         state: State.Created,
         index: contractsList.length
     });

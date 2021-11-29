@@ -261,87 +261,16 @@
   ],
   "networks": {
     "3": {
-      "events": {},
-      "links": {},
-      "address": "0xe0833e0eB700eB18a278AD4D52353621877C17D2",
-      "transactionHash": "0x54d2c0d0587db764a8f52f498620f7521121c74ec02534cd17f81c234547e9c5"
+      "address": "0x68E27618A846D5624871169E08a476f801323bc1"
     },
     "5777": {
-      "events": {
-        "0x632ac77d09152d841f02467b002b00be9dc4d10aba119acc12df299d68e352a2": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "lchash",
-              "type": "uint256"
-            }
-          ],
-          "name": "LegalContractAdded",
-          "type": "event"
-        },
-        "0xc5ff70e7c32028cbcd69737b838781aa484fa5528728a194be40342136069183": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "lchash",
-              "type": "uint256"
-            }
-          ],
-          "name": "LegalContractRmoved",
-          "type": "event"
-        },
-        "0x3a631f6d541ddaa58616a1351a3bfdb685300965fbe10bd918508711fed88fe1": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "lchash",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "signer",
-              "type": "address"
-            }
-          ],
-          "name": "LegalContractSigned",
-          "type": "event"
-        },
-        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "previousOwner",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "newOwner",
-              "type": "address"
-            }
-          ],
-          "name": "OwnershipTransferred",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0xf97615A80ABC635c326B6D9728c0f3c677383448",
-      "transactionHash": "0xcfb3f567969d8eb7ba4e587d2d4fc87bc7b4bc50cd853689ccb2e2bb965f1f54"
+      "address": "0x3F51DA8b32Abbd44280D6214Fa9068B0D309145A"
     },
     "1638046327334": {
-      "events": {},
-      "links": {},
-      "address": "0x61F40D15B0508d6d52E1B88DDC8F578bbb0A3f32",
-      "transactionHash": "0xb5994705407bd4d13e68a125d5b051414e46c5736a52d6af1df5611c4fb9c270"
+      "address": "0x717214158B76dD9D9f15Aa62d0A5F0cDd3a4DD44"
+    },
+    "1638071580756": {
+      "address": "0xb7Ed21DD4227E830eF14c3f370793f313B1f36E3"
     }
   }
 }
