@@ -60,19 +60,45 @@ window.addEventListener('load', async function () {
   }
 })
 
-const dropContainer = document.getElementById('right-side');
+var dropzoneId = "right-side";
+const dropContainer = document.getElementById(dropzoneId);
 console.log(typeof dropContainer);
 dropContainer.ondragover = dropContainer.ondragenter = function(evt) {
   evt.preventDefault();
 };
 
 dropContainer.ondrop = function(evt) {
-  // pretty simple -- but not for IE :(
   evt.preventDefault();
   ckInputFile.files = evt.dataTransfer.files;
   handleFile(ckInputFile.files[0]);
 };
 
+
+
+window.addEventListener("dragenter", function(e) {
+  if (e.target.id != dropzoneId) {
+    e.preventDefault();
+    e.dataTransfer.effectAllowed = "none";
+    e.dataTransfer.dropEffect = "none";
+  }
+}, false);
+
+window.addEventListener("dragover", function(e) {
+  if (e.target.id != dropzoneId) {
+    e.preventDefault();
+    e.dataTransfer.effectAllowed = "none";
+    e.dataTransfer.dropEffect = "none";
+  }
+});
+
+window.addEventListener("drop", function(e) {
+  console.log("i´m here");
+  if (e.target.id != dropzoneId) {
+    e.preventDefault();
+    e.dataTransfer.effectAllowed = "none";
+    e.dataTransfer.dropEffect = "none";
+  }
+});
 const ckInputFile = document.getElementById('ck-file');
 ckInputFile.onchange = async (event) => {
   handleFile(event.target.files.item(0));
@@ -259,18 +285,19 @@ async function verifyContract() {
   const contractKeeper = await new web3.eth.Contract
     (ckjson.abi, ckjson.networks[networkId].address);
 
-
-
-
-
   try {
     SCResponse = await contractKeeper.methods.getLegalContract("0x" + hash.toString(CryptoJS.enc.Hex)).call();
   } catch (err) {
     account1.innerHTML = "";
-    document.getElementById('ck-add').style.display = "";
+
+    document.getElementById('ck-submit').style.display = "none";
     document.getElementById('ck-submit').style.display = "none";
     document.getElementById('ck-sign').style.display = "none";
     document.getElementById("message-area").innerHTML = getReason(err);
+    
+    if(document.getElementById("message-area").innerHTM.search("Contract does not exist")>0){
+      document.getElementById('ck-add').style.display = "";
+    }
 
     return false;
   }
