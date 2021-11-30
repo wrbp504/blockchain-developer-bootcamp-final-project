@@ -294,8 +294,8 @@ async function verifyContract() {
     document.getElementById('ck-submit').style.display = "none";
     document.getElementById('ck-sign').style.display = "none";
     document.getElementById("message-area").innerHTML = getReason(err);
-    
-    if(document.getElementById("message-area").innerHTM.search("Contract does not exist")>0){
+
+    if(String(document.getElementById("message-area").innerHTML).search("Contract")>=0){
       document.getElementById('ck-add').style.display = "";
     }
 
