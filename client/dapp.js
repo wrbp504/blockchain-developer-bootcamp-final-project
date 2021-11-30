@@ -35,8 +35,14 @@ async function selectedAddress() {
 
 async function setHandlers() {
   ethereum.on('accountsChanged',  (accounts) =>{
-    document.getElementById('mm-account').innerHTML = 
-     "<strong>SELECTED " +accounts[0]+"</strong>";
+    if(accounts.length>0){
+      document.getElementById('mm-account').innerHTML = 
+      "<strong>SELECTED " +accounts[0]+"</strong>";
+    }
+    else {
+      document.getElementById('mm-account').innerHTML = 
+      "<strong>Metamask not connected</strong>";
+    }
     verifyContract();
   } );
   ethereum.on('chainChanged', (_chainId) => window.location.reload());
