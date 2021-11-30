@@ -28,23 +28,23 @@
                 data and (connected) to add or to sign a contract, site will connect if any of those
                 functions are requested. BEWARE that add Form will reset if you change selected account
                  in Metamask while adding a contract, as selected address is used for the first signer.
-                 SELECT A PDF FILE AS INITIAL STEP.
+                 SELECT A PDF (OR DROP ON DARK BLUE SIDE) FILE AS INITIAL STEP.
             </p>
         </div>
     </row>
 </head>
 
 <body>
-    <div class="contents">
+    <div class="contents" >
 
         <!--   Left Side of the screen -->
-        <div class="col-md-6 half" style="background-color:lavender;">
+        <div class="col-md-6 half" style="background-color:lavender;" >
             <h5 id="mm-account" style="color: rgb(245, 16, 8)" >mm-account</h5>
             <iframe id="pdfvisor" style="width: 100%;height: 100%;border: none;"></iframe>
         </div>
 
         <!--      Right side of the screen -->
-        <div class="col-md-6 half" style="background-color:rgb(118, 135, 209);">
+        <div class="col-md-6 half" style="background-color:rgb(118, 135, 209);" id="right-side" >
             <br>
             <input type="file" id="ck-file" required style="display:none" />
             <button class="roundbutton" id="ck-file2" style="top: 5%; left:10%; position: absolute">
