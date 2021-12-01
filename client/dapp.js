@@ -328,13 +328,13 @@ ckAdd.onclick = async () => {
   }
 
   console.log("*********   antes     ***********");
-  ckAdd.style.display = "none";
   ckSubmit.style.display = "";
 
   if ((await selectedAddress()) == "") {
+    verifyContract();
     return;
   }
-
+  ckAdd.style.display = "none";
   console.log("*********   despues     ***********");
   inputForm();
 
