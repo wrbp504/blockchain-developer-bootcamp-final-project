@@ -8,7 +8,7 @@ https://wrbp504.github.io
 
 ### Prerequisites
 
-- Node.js >= v14
+- Node.js >= v14 & <=16.13.0 `ganache-cli do not work with latest node vesion.`
 - Truffle and Ganache
 - npm
 - `git`
@@ -18,7 +18,7 @@ https://wrbp504.github.io
 - Clone repository `git clone https://github.com/wrbp504/blockchain-developer-bootcamp-final-project` 
 - Run `npm install` in project root to install dependencies
 - Run local testnet `ganache-cli --networkId 5777`
-- Add this local testnet to Metamask http://127.0.0.1:8545 with Chain Id 1337 
+- Add this local testnet to Metamask `http://127.0.0.1:8545` with Chain Id `1337` 
 - `truffle migrate --network develop`
 - `truffle console --network develop`
 - Run tests in Truffle console: `test`
@@ -33,7 +33,7 @@ https://wrbp504.github.io
 
 ## Screencast link
 
-
+https://youtu.be/U2PMAXeVWSc
 
 ## Project description
 
@@ -62,4 +62,4 @@ The idea is that 2 or 3 parties agree to a document (Legal contract), save the h
 2. .ropsteninfura with the url containig the project id of infura. 
 
 ## abi and deployment address
-The third step in migrations scripts creates a reduced json file of the contract containign  the abi and deployment addresses by network to be used by the client. 
+The third step in migrations scripts creates a reduced json file of the contract containing the abi and deployment addresses by network to be used by the client. 

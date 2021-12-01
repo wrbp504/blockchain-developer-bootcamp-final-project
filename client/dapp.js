@@ -19,7 +19,7 @@ const ckFile = document.getElementById('ck-file');
 const ckFile2 = document.getElementById("ck-file2");
 const ckFname = document.getElementById('ck-fname');
 const ckContent = document.getElementById("ck-content");
-const ckSign =  document.getElementById("ck-sign");
+const ckSign = document.getElementById("ck-sign");
 const ckSubmit = document.getElementById("ck-submit");
 const details = document.getElementById("details");
 const messageArea = document.getElementById("message-area");
@@ -43,15 +43,15 @@ async function selectedAddress() {
     });
 
     if (accounts.length == 0) {
-      try{
+      try {
         accounts = await ethereum.request({
           method:
             'eth_requestAccounts'
         });
       }
-      catch(err){
-        accounts=[];
-        alert("Connection failed : "+ getReason(err));
+      catch (err) {
+        accounts = [];
+        alert("Connection failed : " + getReason(err));
         return "";
       }
     }
@@ -67,11 +67,11 @@ async function setHandlers() {
     if (accounts.length > 0) {
       mmAccount.innerHTML =
         accounts[0];
-        if (ckSubmit.style.display == ""){
-          inputForm();
-        } else {
-          verifyContract();
-        }
+      if (ckSubmit.style.display == "") {
+        inputForm();
+      } else {
+        verifyContract();
+      }
     }
     else {
       window.location.reload();
@@ -177,82 +177,37 @@ ckFile2.onclick = async () => {
 //Error parse
 
 function getReason(err) {
-  const reason = { reason: "", message: "", other: "" ,code:""};
-  reason.message = "";
+  let resp = "";
+  let errjsonstr = String(err);
+  console.log("typeof " + typeof errjsonstr);
+  let pr = errjsonstr.search("object Object");
+  if (pr>=0){
+    errjsonstr=JSON.stringify(err);
+  }
+  let arr = /("code": *[-0-9]*)/.exec(errjsonstr);
+  console.log("arr "+arr);
+  if (arr !== null) {
+    resp =  arr[1]+"  ";
+  }
+  arr = /"reason": *"([^"]*)"/.exec(errjsonstr);
+  console.log("arr "+arr);
+  if (arr !== null) {
+    resp+=  arr[1];
+    return  resp;
+  }
+  arr = /"message": *"([^"]*)"/.exec(errjsonstr);
+  console.log("arr "+arr);
+  if (arr !== null) {
+    return resp+arr[1];
+  }
 
-  getReason2(err, reason);
-  console.log("********* reason " +reason.reason);
-  console.log("********* message " +reason.message);
-  console.log("********* code " +reason.code);
-
-  if (reason.reason !== "") return reason.reason; 
-  if (reason.message !== "") return reason.message;
-  if (reason.code !== "") return reason.code;
-  return reason.other.substring(0,20);
-
+    return resp + errjsonstr.substring(0, 160) + "...";
 }
 
-function getReason2(err, reason) {
-  // console.log("Entrado en get reason " + typeof err);
-  // console.log("err " + err);
-  // console.log("reason" + String(reason));
-
-
-  let pos = String(err).search("{");
-  // console.log("Primer pos " + pos);
-
-  if (pos > 1) {
-    let pos2 = String(err).lastIndexOf("}") + 1;
-    let errjson = JSON.parse(String(err).substring(pos, pos2));
-    getReason2(errjson, reason);
-    return;
-  }
-  else if (typeof err === 'object') {
-    let keys = Object.keys(err);
-    // console.log("keys " + keys);
-
-    if (keys.length == 0) {
-      reason.other = String(err);
-      return;
-    }
-
-    for (var i = 0; i < keys.length; i++) {
-      console.log(keys[i] + "-->" + err[keys[i]]);
-      if (!keys[i].localeCompare("reason")) {
-        // console.log("reason==> " + err["reason"]);
-        reason.reason = err["reason"]
-        return;
-      }
-      if (!keys[i].localeCompare("code")) {
-        // console.log("code==> " + err["code"]);
-        reason.code = err["code"]
-      }
-      if (!keys[i].localeCompare("message")) {
-        // console.log("message==> " + err["message"]);
-        let msg = err["message"];
-        let pos3 = msg.search(":");
-        if (pos3 > 0) {
-          reason.message = msg.substring(pos3 + 2)
-        } else{
-          reason.message = msg;
-        }
-      }
-      if (typeof err[keys[i]] === 'object') {
-        getReason2(err[keys[i]], reason);
-        if (reason.reason !== "") return;
-      } else {
-        if (err[keys[i]] != null) {
-          reason.other = String(err[keys[i]]);
-        }
-      }
-    }
-  }
-  return;
-}
 
 async function verifyContract() {
 
-  console.log ("ENTRANDO A verifyCOntract()");
+  console.log("ENTRANDO A verifyCOntract()");
 
   let SCResponse;
   let accounts;
@@ -349,7 +304,7 @@ async function verifyContract() {
   switch (parseInt(legalContract.state)) {
     case 1:
       messageArea.innerHTML = "Accounts labeled NOT SIGNED, must be selected first in Metamask to sign";
-      console.log(String(!mmAccount.innerHTML)+ " test ")
+      console.log(String(!mmAccount.innerHTML) + " test ")
       if (!String(mmAccount.innerHTML).localeCompare("Metamask not connected")) {
         mmConnect.style.display = "";
       }
@@ -382,11 +337,11 @@ ckAdd.onclick = async () => {
 
   console.log("*********   despues     ***********");
   inputForm();
-  
+
 };
 
- function inputForm(){
-  
+function inputForm() {
+
   details.innerHTML = `
   <label>Signer 1:</label>
   <div id="account1"  style="color: white;width:95%"></div>
@@ -398,8 +353,8 @@ ckAdd.onclick = async () => {
   <input id="account3" type="text" placeholder="Account3" style="width:95%">
   <input id="name3" type="text" placeholder="Name3" style="width:95%">
   `
-  account1.innerHTML = selectedAddress().then((account) =>{
-    document.getElementById("account1").innerHTML=account;
+  account1.innerHTML = selectedAddress().then((account) => {
+    document.getElementById("account1").innerHTML = account;
   });
   messageArea.innerHTML = "Beware that form will be reset if new account is selected in Metamask!!!!"
 
