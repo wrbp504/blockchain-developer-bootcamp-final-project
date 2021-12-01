@@ -63,3 +63,6 @@ The idea is that 2 or 3 parties agree to a document (Legal contract), save the h
 
 ## abi and deployment address
 The third step in migrations scripts creates a reduced json file of the contract containing the abi and deployment addresses by network to be used by the client. 
+
+## favicon
+Favicon from https://github.com/ethereum/ethereum-org/blob/master/dist/favicon.ico
